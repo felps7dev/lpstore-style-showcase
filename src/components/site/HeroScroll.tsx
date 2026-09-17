@@ -47,7 +47,7 @@ export function HeroScroll() {
   }, []);
 
   const eased = 1 - Math.pow(1 - p, 3);
-  const x = reduceMotion ? (isNarrow ? 5 : 20) : isNarrow ? 7 - eased * 11 : 24 - eased * 39;
+  const x = reduceMotion ? (isNarrow ? 22 : 20) : isNarrow ? 25 - eased * 8 : 24 - eased * 39;
   const y = reduceMotion ? (isNarrow ? -19 : -5) : isNarrow ? -21 + eased * 48 : -7 + eased * 39;
   const rotate = reduceMotion ? 0 : isNarrow ? -1.5 + eased * 4 : -2.5 + eased * 8;
   const scale = reduceMotion
