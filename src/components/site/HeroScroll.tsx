@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import tenis from "@/assets/tenis.jpg.asset.json";
+import logo from "@/assets/lp-logo.png.asset.json";
 import { whatsappLink } from "@/lib/whatsapp";
 
 const STAGES = ["Street Style", "Linha Premium", "Seu Estilo"];
@@ -8,12 +8,18 @@ export function HeroScroll() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const [p, setP] = useState(0);
   const [isNarrow, setIsNarrow] = useState(false);
+  const [reduceMotion, setReduceMotion] = useState(false);
 
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 767px)");
-    const apply = () => setIsNarrow(mq.matches);
+    const motionMq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const apply = () => {
+      setIsNarrow(mq.matches);
+      setReduceMotion(motionMq.matches);
+    };
     apply();
     mq.addEventListener("change", apply);
+    motionMq.addEventListener("change", apply);
 
     let frame = 0;
     const update = () => {
@@ -33,18 +39,23 @@ export function HeroScroll() {
     window.addEventListener("resize", onScroll);
     return () => {
       mq.removeEventListener("change", apply);
+      motionMq.removeEventListener("change", apply);
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
       if (frame) cancelAnimationFrame(frame);
     };
   }, []);
 
-  const x = isNarrow ? 2 + p * 4 : 24 - p * 22;
-  const y = isNarrow ? -18 + p * 58 : -6 + p * 44;
-  const rotate = -7 + p * 24;
-  const scale = (isNarrow ? 0.95 : 1.02) - p * 0.6;
-  const opacity = p > 0.9 ? Math.max(0, (1 - p) / 0.1) : 1;
-
+  const eased = 1 - Math.pow(1 - p, 3);
+  const x = reduceMotion ? (isNarrow ? 5 : 20) : isNarrow ? 7 - eased * 11 : 24 - eased * 39;
+  const y = reduceMotion ? (isNarrow ? -19 : -5) : isNarrow ? -21 + eased * 48 : -7 + eased * 39;
+  const rotate = reduceMotion ? 0 : isNarrow ? -1.5 + eased * 4 : -2.5 + eased * 8;
+  const scale = reduceMotion
+    ? isNarrow
+      ? 0.78
+      : 1
+    : (isNarrow ? 0.82 : 1.04) - eased * (isNarrow ? 0.24 : 0.38);
+  const opacity = reduceMotion ? 0.9 : 1 - Math.max(0, (p - 0.72) / 0.28) * 0.58;
 
   const textIndex = p < 0.3 ? 0 : p < 0.62 ? 1 : 2;
 
@@ -59,15 +70,14 @@ export function HeroScroll() {
           />
         </div>
 
-        {/* product */}
+        {/* brand mark */}
         <img
-          src={tenis.url}
-          alt="Tênis em destaque na LP Store"
-          className="pointer-events-none absolute left-1/2 top-1/2 z-10 max-h-[44vh] w-[80vw] max-w-[620px] -translate-x-1/2 -translate-y-1/2 rounded-3xl object-cover will-change-transform md:max-h-[74vh] md:w-[42vw]"
+          src={logo.url}
+          alt="LP Store Import's"
+          className="pointer-events-none absolute left-1/2 top-1/2 z-10 h-auto w-[72vw] max-w-[430px] -translate-x-1/2 -translate-y-1/2 object-contain drop-shadow-[0_28px_45px_oklch(0_0_0/0.48)] will-change-[transform,opacity] md:w-[36vw] md:max-w-[560px]"
           style={{
-            transform: `translate(calc(-50% + ${x}vw), calc(-50% + ${y}vh)) rotate(${rotate}deg) scale(${scale})`,
+            transform: `translate3d(calc(-50% + ${x}vw), calc(-50% + ${y}vh), 0) rotate(${rotate}deg) scale(${scale})`,
             opacity,
-            maskImage: "radial-gradient(120% 120% at 50% 50%, #000 62%, transparent 100%)",
           }}
         />
 
